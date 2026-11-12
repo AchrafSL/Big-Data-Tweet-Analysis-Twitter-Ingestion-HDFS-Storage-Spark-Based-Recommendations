@@ -1,6 +1,6 @@
 # Analyse Big Data de Tweets & Système de Recommandation Hybride
 
-**Version Française** | [English Version](README_EN.md)
+**Version Française** | [English Version](README.md)
 
 Projet académique de fin de module en **Calcul Parallèle et Distribué**, réalisé au sein du Master **Big Data, Intelligence Artificielle et Applications Avancées (BDIAA)** à la Faculté des Sciences de Kénitra, Université Ibn Tofaïl.
 
