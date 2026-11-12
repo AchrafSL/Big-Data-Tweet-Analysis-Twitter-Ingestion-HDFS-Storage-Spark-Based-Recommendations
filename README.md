@@ -1,6 +1,6 @@
 # Big Data Tweet Analytics & Hybrid Recommendation Engine
 
-[Version Française](README.md) | **English Version**
+[Version Française](README_FR.md) | **English Version**
 
 Academic final project for the **Parallel and Distributed Computing** course, completed within the **Master's in Big Data, Artificial Intelligence, and Advanced Applications (BDIAA)** at the Faculty of Sciences of Kenitra, Ibn Tofail University.
 
