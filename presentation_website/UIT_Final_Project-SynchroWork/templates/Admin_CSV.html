@@ -1,0 +1,578 @@
+{% extends "Menu.html" %}
+{% block body %}
+<div class="admin-csv-wrapper">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/Admin_CSV.css') }}">
+
+    <!-- Header Section -->
+    <div class="admin-csv-header">
+        <div class="header-content">
+            <h1><i class="fa fa-database" style="color: #6366f1;"></i> Big Data CSV Export Panel</h1>
+            <p class="subtitle">
+                Generate dataset files for the recommendation pipeline. Data is sourced directly from the SQLite database.
+            </p>
+            <div class="csv-meta-note">
+                <i class="fa fa-info-circle"></i> Normal website operations update the database and CSV files automatically. These manual buttons serve as a fallback for records inserted directly into SQLite.
+            </div>
+            <div class="output-path">
+                <span>📁 Output directory:</span>
+                <code>{{ output_dir }}</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3 Manual Generation Cards Grid -->
+    <div class="csv-grid">
+
+        <!-- products.csv -->
+        <div class="csv-card">
+            <div class="csv-card-header">
+                <div class="csv-card-icon"><i class="fa fa-box-open"></i></div>
+                <div>
+                    <h3>products.csv</h3>
+                    <p class="csv-schema"><code>productId, name, category, color, theme</code></p>
+                </div>
+            </div>
+            <p class="csv-desc">All products from the catalog with their category, color, and theme labels.</p>
+            <div class="csv-actions">
+                <form action="/admin/csv/generate/products" method="POST">
+                    <button type="submit" class="btn-gen" id="btn-gen-products">
+                        <i class="fa fa-sync-alt"></i> Generate products.csv
+                    </button>
+                </form>
+            </div>
+            {% if results and results.products %}
+            <div class="csv-result-box {{ results.products.status }}">
+                {% if results.products.status == 'ok' %}
+                <div class="result-status ok">
+                    <i class="fa fa-check-circle"></i> {{ results.products.count }} rows exported
+                </div>
+                <a href="/admin/csv/download/products.csv" class="btn-download" id="dl-products">
+                    <i class="fa fa-download"></i> Download
+                </a>
+                {% else %}
+                <div class="result-status err">
+                    <i class="fa fa-exclamation-triangle"></i> Error: {{ results.products.error }}
+                </div>
+                {% endif %}
+                <div class="result-time">{{ results.products.timestamp }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- users.csv -->
+        <div class="csv-card">
+            <div class="csv-card-header">
+                <div class="csv-card-icon"><i class="fa fa-users"></i></div>
+                <div>
+                    <h3>users.csv</h3>
+                    <p class="csv-schema"><code>userId, favTheme, favColor</code></p>
+                </div>
+            </div>
+            <p class="csv-desc">All registered users with their favorite theme and favorite color preferences.</p>
+            <div class="csv-actions">
+                <form action="/admin/csv/generate/users" method="POST">
+                    <button type="submit" class="btn-gen" id="btn-gen-users">
+                        <i class="fa fa-sync-alt"></i> Generate users.csv
+                    </button>
+                </form>
+            </div>
+            {% if results and results.users %}
+            <div class="csv-result-box {{ results.users.status }}">
+                {% if results.users.status == 'ok' %}
+                <div class="result-status ok">
+                    <i class="fa fa-check-circle"></i> {{ results.users.count }} rows exported
+                </div>
+                <a href="/admin/csv/download/users.csv" class="btn-download" id="dl-users">
+                    <i class="fa fa-download"></i> Download
+                </a>
+                {% else %}
+                <div class="result-status err">
+                    <i class="fa fa-exclamation-triangle"></i> Error: {{ results.users.error }}
+                </div>
+                {% endif %}
+                <div class="result-time">{{ results.users.timestamp }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ratings.csv -->
+        <div class="csv-card">
+            <div class="csv-card-header">
+                <div class="csv-card-icon"><i class="fa fa-star"></i></div>
+                <div>
+                    <h3>ratings.csv</h3>
+                    <p class="csv-schema"><code>userId, productId, rating</code></p>
+                </div>
+            </div>
+            <p class="csv-desc">All 1–5 star customer ratings recorded for catalog products.</p>
+            <div class="csv-actions">
+                <form action="/admin/csv/generate/ratings" method="POST">
+                    <button type="submit" class="btn-gen" id="btn-gen-ratings">
+                        <i class="fa fa-sync-alt"></i> Generate ratings.csv
+                    </button>
+                </form>
+            </div>
+            {% if results and results.ratings %}
+            <div class="csv-result-box {{ results.ratings.status }}">
+                {% if results.ratings.status == 'ok' %}
+                <div class="result-status ok">
+                    <i class="fa fa-check-circle"></i> {{ results.ratings.count }} rows exported
+                </div>
+                <a href="/admin/csv/download/ratings.csv" class="btn-download" id="dl-ratings">
+                    <i class="fa fa-download"></i> Download
+                </a>
+                {% else %}
+                <div class="result-status err">
+                    <i class="fa fa-exclamation-triangle"></i> Error: {{ results.ratings.error }}
+                </div>
+                {% endif %}
+                <div class="result-time">{{ results.ratings.timestamp }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- JSON Test Data Import Section -->
+    <div class="json-import-section">
+        <div class="json-section-header">
+            <div class="json-section-title">
+                <h2><i class="fa fa-code" style="color: #6366f1;"></i> JSON Test Data Import</h2>
+                <p class="subtitle">
+                    Inject test data manually using JSON to validate the recommendation and Big Data pipeline without registering users or creating products through the website.
+                </p>
+            </div>
+            <div class="json-tab-controls" role="tablist">
+                <button type="button" class="json-tab-btn active" data-tab="tab-users" id="tab-btn-users">
+                    <i class="fa fa-users"></i> Users JSON
+                </button>
+                <button type="button" class="json-tab-btn" data-tab="tab-products" id="tab-btn-products">
+                    <i class="fa fa-box-open"></i> Products JSON
+                </button>
+                <button type="button" class="json-tab-btn" data-tab="tab-ratings" id="tab-btn-ratings">
+                    <i class="fa fa-star"></i> Ratings JSON
+                </button>
+                <button type="button" class="json-tab-btn" data-tab="tab-accounts" id="tab-btn-accounts">
+                    <i class="fa fa-user-plus"></i> Create Accounts
+                </button>
+                <button type="button" class="json-tab-btn" data-tab="tab-all" id="tab-btn-all">
+                    <i class="fa fa-th-large"></i> All Cards
+                </button>
+            </div>
+        </div>
+
+        <div class="json-panels-container" id="json-panels-container">
+            <!-- Users JSON Card -->
+            <div class="json-card-panel active" id="panel-users" data-panel="tab-users">
+                <div class="json-card-header">
+                    <div class="csv-card-icon"><i class="fa fa-users"></i></div>
+                    <div>
+                        <h3>Users JSON</h3>
+                        <p class="csv-schema"><code>userId, favTheme, favColor</code></p>
+                    </div>
+                </div>
+                <div class="json-example-box">
+                    <div class="json-example-header">
+                        <span><i class="fa fa-info-circle"></i> Expected JSON Format:</span>
+                        <button type="button" class="btn-load-example" onclick="loadExample('users')">
+                            <i class="fa fa-magic"></i> Load Example
+                        </button>
+                    </div>
+                    <pre class="json-example-code"><code>[
+  {
+    "userId": 101,
+    "favTheme": "gaming",
+    "favColor": "black"
+  },
+  {
+    "userId": 102,
+    "favTheme": "anime",
+    "favColor": "white"
+  }
+]</code></pre>
+                </div>
+                <div class="json-input-wrapper">
+                    <label for="json-input-users" class="json-input-label">Paste Users JSON Array:</label>
+                    <textarea id="json-input-users" class="json-textarea" rows="8" placeholder='[&#10;  {&#10;    "userId": 101,&#10;    "favTheme": "gaming",&#10;    "favColor": "black"&#10;  },&#10;  {&#10;    "userId": 102,&#10;    "favTheme": "anime",&#10;    "favColor": "white"&#10;  }&#10;]' spellcheck="false"></textarea>
+                </div>
+                <div class="json-card-actions">
+                    <button type="button" class="btn-import" id="btn-import-users" onclick="importJsonData('users')">
+                        <i class="fa fa-file-import"></i> Import JSON
+                    </button>
+                    <button type="button" class="btn-clear" id="btn-clear-users" onclick="clearJsonData('users')">
+                        <i class="fa fa-trash-alt"></i> Clear
+                    </button>
+                </div>
+                <div class="json-status-box" id="status-users" style="display: none;"></div>
+            </div>
+
+            <!-- Products JSON Card -->
+            <div class="json-card-panel" id="panel-products" data-panel="tab-products">
+                <div class="json-card-header">
+                    <div class="csv-card-icon"><i class="fa fa-box-open"></i></div>
+                    <div>
+                        <h3>Products JSON</h3>
+                        <p class="csv-schema"><code>productId, name, category, color, theme</code></p>
+                    </div>
+                </div>
+                <div class="json-example-box">
+                    <div class="json-example-header">
+                        <span><i class="fa fa-info-circle"></i> Expected JSON Format:</span>
+                        <button type="button" class="btn-load-example" onclick="loadExample('products')">
+                            <i class="fa fa-magic"></i> Load Example
+                        </button>
+                    </div>
+                    <pre class="json-example-code"><code>[
+  {
+    "productId": 501,
+    "name": "Gaming T-Shirt",
+    "category": "tshirt",
+    "color": "black",
+    "theme": "gaming"
+  },
+  {
+    "productId": 502,
+    "name": "Anime T-Shirt",
+    "category": "tshirt",
+    "color": "white",
+    "theme": "anime"
+  }
+]</code></pre>
+                </div>
+                <div class="json-input-wrapper">
+                    <label for="json-input-products" class="json-input-label">Paste Products JSON Array:</label>
+                    <textarea id="json-input-products" class="json-textarea" rows="8" placeholder='[&#10;  {&#10;    "productId": 501,&#10;    "name": "Gaming T-Shirt",&#10;    "category": "tshirt",&#10;    "color": "black",&#10;    "theme": "gaming"&#10;  },&#10;  {&#10;    "productId": 502,&#10;    "name": "Anime T-Shirt",&#10;    "category": "tshirt",&#10;    "color": "white",&#10;    "theme": "anime"&#10;  }&#10;]' spellcheck="false"></textarea>
+                </div>
+                <div class="json-card-actions">
+                    <button type="button" class="btn-import" id="btn-import-products" onclick="importJsonData('products')">
+                        <i class="fa fa-file-import"></i> Import JSON
+                    </button>
+                    <button type="button" class="btn-clear" id="btn-clear-products" onclick="clearJsonData('products')">
+                        <i class="fa fa-trash-alt"></i> Clear
+                    </button>
+                </div>
+                <div class="json-status-box" id="status-products" style="display: none;"></div>
+            </div>
+
+            <!-- Ratings JSON Card -->
+            <div class="json-card-panel" id="panel-ratings" data-panel="tab-ratings">
+                <div class="json-card-header">
+                    <div class="csv-card-icon"><i class="fa fa-star"></i></div>
+                    <div>
+                        <h3>Ratings JSON</h3>
+                        <p class="csv-schema"><code>userId, productId, rating</code></p>
+                    </div>
+                </div>
+                <div class="json-example-box">
+                    <div class="json-example-header">
+                        <span><i class="fa fa-info-circle"></i> Expected JSON Format:</span>
+                        <button type="button" class="btn-load-example" onclick="loadExample('ratings')">
+                            <i class="fa fa-magic"></i> Load Example
+                        </button>
+                    </div>
+                    <pre class="json-example-code"><code>[
+  {
+    "userId": 101,
+    "productId": 501,
+    "rating": 5
+  },
+  {
+    "userId": 102,
+    "productId": 502,
+    "rating": 4
+  }
+]</code></pre>
+                </div>
+                <div class="json-input-wrapper">
+                    <label for="json-input-ratings" class="json-input-label">Paste Ratings JSON Array:</label>
+                    <textarea id="json-input-ratings" class="json-textarea" rows="8" placeholder='[&#10;  {&#10;    "userId": 101,&#10;    "productId": 501,&#10;    "rating": 5&#10;  },&#10;  {&#10;    "userId": 102,&#10;    "productId": 502,&#10;    "rating": 4&#10;  }&#10;]' spellcheck="false"></textarea>
+                </div>
+                <div class="json-card-actions">
+                    <button type="button" class="btn-import" id="btn-import-ratings" onclick="importJsonData('ratings')">
+                        <i class="fa fa-file-import"></i> Import JSON
+                    </button>
+                    <button type="button" class="btn-clear" id="btn-clear-ratings" onclick="clearJsonData('ratings')">
+                        <i class="fa fa-trash-alt"></i> Clear
+                    </button>
+                </div>
+                <div class="json-status-box" id="status-ratings" style="display: none;"></div>
+            </div>
+
+            <!-- Create User Accounts Card -->
+            <div class="json-card-panel" id="panel-accounts" data-panel="tab-accounts">
+                <div class="json-card-header">
+                    <div class="csv-card-icon"><i class="fa fa-user-plus"></i></div>
+                    <div>
+                        <h3>Create User Accounts</h3>
+                        <p class="csv-schema"><code>username, email, password, favTheme, favColor</code></p>
+                    </div>
+                </div>
+                <div class="json-example-box">
+                    <div class="json-example-header">
+                        <span><i class="fa fa-info-circle"></i> Expected JSON Format (Real login accounts):</span>
+                        <button type="button" class="btn-load-example" onclick="loadExample('accounts')">
+                            <i class="fa fa-magic"></i> Load Example
+                        </button>
+                    </div>
+                    <pre class="json-example-code"><code>[
+  {
+    "username": "gaming_user",
+    "email": "gaming@example.com",
+    "password": "TestPass123!",
+    "favTheme": "gaming",
+    "favColor": "black"
+  },
+  {
+    "username": "anime_user",
+    "email": "anime@example.com",
+    "password": "TestPass456!",
+    "favTheme": "anime",
+    "favColor": "white"
+  }
+]</code></pre>
+                </div>
+                <div class="json-input-wrapper">
+                    <label for="json-input-accounts" class="json-input-label">Paste Accounts JSON Array (Preloaded with Example):</label>
+                    <textarea id="json-input-accounts" class="json-textarea" rows="8" placeholder='[&#10;  {&#10;    "username": "gaming_user",&#10;    "email": "gaming@example.com",&#10;    "password": "TestPass123!",&#10;    "favTheme": "gaming",&#10;    "favColor": "black"&#10;  }&#10;]' spellcheck="false"></textarea>
+                </div>
+                <div class="json-card-actions">
+                    <button type="button" class="btn-import" id="btn-import-accounts" onclick="importJsonData('accounts')">
+                        <i class="fa fa-user-plus"></i> Import Accounts
+                    </button>
+                    <button type="button" class="btn-clear" id="btn-clear-accounts" onclick="clearJsonData('accounts')">
+                        <i class="fa fa-trash-alt"></i> Clear
+                    </button>
+                </div>
+                <div class="json-status-box" id="status-accounts" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const JSON_EXAMPLES = {
+    users: JSON.stringify([
+      {
+        "userId": 101,
+        "favTheme": "gaming",
+        "favColor": "black"
+      },
+      {
+        "userId": 102,
+        "favTheme": "anime",
+        "favColor": "white"
+      }
+    ], null, 2),
+    products: JSON.stringify([
+      {
+        "productId": 501,
+        "name": "Gaming T-Shirt",
+        "category": "tshirt",
+        "color": "black",
+        "theme": "gaming"
+      },
+      {
+        "productId": 502,
+        "name": "Anime T-Shirt",
+        "category": "tshirt",
+        "color": "white",
+        "theme": "anime"
+      }
+    ], null, 2),
+    ratings: JSON.stringify([
+      {
+        "userId": 101,
+        "productId": 501,
+        "rating": 5
+      },
+      {
+        "userId": 102,
+        "productId": 502,
+        "rating": 4
+      }
+    ], null, 2),
+    accounts: JSON.stringify([
+      {
+        "username": "gaming_user",
+        "email": "gaming@example.com",
+        "password": "TestPass123!",
+        "favTheme": "gaming",
+        "favColor": "black"
+      },
+      {
+        "username": "anime_user",
+        "email": "anime@example.com",
+        "password": "TestPass456!",
+        "favTheme": "anime",
+        "favColor": "white"
+      }
+    ], null, 2)
+};
+
+// Tab Switching
+document.addEventListener('DOMContentLoaded', () => {
+    const tabButtons = document.querySelectorAll('.json-tab-btn');
+    const container = document.getElementById('json-panels-container');
+    const panels = document.querySelectorAll('.json-card-panel');
+
+    // Pre-populate accounts textarea with the example JSON on page load
+    loadExample('accounts');
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTab = btn.getAttribute('data-tab');
+
+            tabButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            if (targetTab === 'tab-all') {
+                container.classList.add('grid-view');
+                panels.forEach(p => p.classList.add('active'));
+            } else {
+                container.classList.remove('grid-view');
+                panels.forEach(p => {
+                    if (p.getAttribute('data-panel') === targetTab) {
+                        p.classList.add('active');
+                    } else {
+                        p.classList.remove('active');
+                    }
+                });
+            }
+        });
+    });
+});
+
+function loadExample(type) {
+    const textarea = document.getElementById(`json-input-${type}`);
+    if (textarea && JSON_EXAMPLES[type]) {
+        textarea.value = JSON_EXAMPLES[type];
+        hideStatus(type);
+    }
+}
+
+function clearJsonData(type) {
+    const textarea = document.getElementById(`json-input-${type}`);
+    if (textarea) {
+        textarea.value = '';
+    }
+    hideStatus(type);
+}
+
+function hideStatus(type) {
+    const box = document.getElementById(`status-${type}`);
+    if (box) {
+        box.style.display = 'none';
+        box.className = 'json-status-box';
+        box.innerHTML = '';
+    }
+}
+
+function showStatus(type, isSuccess, message) {
+    const box = document.getElementById(`status-${type}`);
+    if (!box) return;
+
+    box.style.display = 'block';
+    box.className = `json-status-box ${isSuccess ? 'ok' : 'err'}`;
+    const icon = isSuccess ? 'fa-check-circle' : 'fa-exclamation-triangle';
+    box.innerHTML = `
+        <div class="result-status ${isSuccess ? 'ok' : 'err'}">
+            <i class="fa ${icon}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+}
+
+function showCustomStatus(type, isSuccess, innerHtml) {
+    const box = document.getElementById(`status-${type}`);
+    if (!box) return;
+
+    box.style.display = 'block';
+    box.className = `json-status-box ${isSuccess ? 'ok' : 'err'}`;
+    box.innerHTML = `
+        <div class="result-status ${isSuccess ? 'ok' : 'err'}" style="flex-direction: column; align-items: flex-start;">
+            ${innerHtml}
+        </div>
+    `;
+}
+
+function importJsonData(type) {
+    const textarea = document.getElementById(`json-input-${type}`);
+    const btn = document.getElementById(`btn-import-${type}`);
+    if (!textarea || !btn) return;
+
+    const raw = textarea.value.trim();
+    if (!raw) {
+        showStatus(type, false, "Please paste a JSON array before clicking Import.");
+        return;
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(raw);
+    } catch (e) {
+        showStatus(type, false, `Malformed JSON syntax: ${e.message}`);
+        return;
+    }
+
+    if (!Array.isArray(parsed)) {
+        showStatus(type, false, "Invalid format: Top-level payload must be a JSON array of objects.");
+        return;
+    }
+
+    if (parsed.length === 0) {
+        showStatus(type, false, "JSON array cannot be empty.");
+        return;
+    }
+
+    // Set loading state
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<i class="fa fa-spinner fa-spin"></i> Importing...`;
+    hideStatus(type);
+
+    fetch(`/admin/import/${type}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(parsed)
+    })
+    .then(async (response) => {
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            throw new Error(`Server returned status ${response.status} (non-JSON response).`);
+        }
+        return { ok: response.ok, data };
+    })
+    .then(({ ok, data }) => {
+        if (ok && data.success) {
+            if (type === 'accounts' && data.created_users && data.created_users.length > 0) {
+                let html = `<div><strong><i class="fa fa-check-circle"></i> ${data.message}</strong></div>`;
+                html += `<div style="margin-top: 8px; font-size: 0.82rem;"><strong>Generated Database User IDs (ready for preferences & ratings import):</strong></div>`;
+                html += `<ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.82rem; line-height: 1.6;">`;
+                data.created_users.forEach(u => {
+                    html += `<li><strong>User ID: <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: 700;">${u.userId}</code></strong> — Username: <code>${u.username}</code> &lt;${u.email}&gt; (Password hashed, ready for login)</li>`;
+                });
+                html += `</ul>`;
+                html += `<div style="margin-top: 8px; font-size: 0.78rem; color: #166534;"><i class="fa fa-check"></i> users.csv has been automatically updated. You can now use these User IDs in Ratings JSON!</div>`;
+                showCustomStatus(type, true, html);
+            } else {
+                showStatus(type, true, data.message || `Successfully imported ${data.count} ${type} record(s).`);
+            }
+        } else {
+            showStatus(type, false, data.error || "Import failed. Please check the JSON format and constraints.");
+        }
+    })
+    .catch((err) => {
+        showStatus(type, false, `Network error: ${err.message}`);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+</script>
+{% endblock %}

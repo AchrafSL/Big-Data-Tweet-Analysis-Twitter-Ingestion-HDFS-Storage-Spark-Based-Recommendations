@@ -1,0 +1,116 @@
+{% extends "Menu.html" %}
+{% block body %}
+<div class="producer-ratings-container">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/Producer_Ratings.css') }}">
+
+    <!-- Header Section -->
+    <div class="ratings-header">
+        <div class="header-content">
+            <h1><i class="fa fa-star" style="color: #f59e0b;"></i> Product Ratings &amp; Reviews Breakdown</h1>
+            <p class="subtitle">Monitor satisfaction metrics, star distributions, and client feedback for your digital services.</p>
+        </div>
+        <div class="header-nav">
+            <a href="/producer/dashboard" class="btn-secondary"><i class="fa fa-arrow-left"></i> Back to Studio</a>
+            <a href="/trends" class="btn-secondary"><i class="fa fa-chart-line"></i> View Trends</a>
+        </div>
+    </div>
+
+    {% if ratings_data %}
+    <div class="ratings-products-list">
+        {% for item in ratings_data %}
+        {% set offer = item.offer %}
+        <div class="product-rating-card" id="product-{{ offer.idOffer }}">
+            <!-- Card Header -->
+            <div class="card-top-bar">
+                <div class="product-info-group">
+                    <img src="{{ url_for('static', filename='Images/product_pics/' + offer.image_Name) }}" alt="{{ offer.name }}" class="product-thumb" onerror="this.src='/static/Images/logo.jpg'">
+                    <div>
+                        <span class="category-pill">{{ offer.theme or 'General' }}</span>
+                        <h2 class="product-title">{{ offer.name }}</h2>
+                        <span class="product-id">Product #{{ offer.idOffer }} &bull; {{ offer.Offer_price }} MAD</span>
+                    </div>
+                </div>
+                <div class="quick-link">
+                    <a href="/Product_Description?productId={{ offer.idOffer }}" target="_blank" class="btn-text">
+                        View Public Page <i class="fa fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card Body: 2 Columns (Stats & Distribution / Reviews) -->
+            <div class="card-content-grid">
+                <!-- Left: Star Metrics & 1-5 Star Distribution -->
+                <div class="metrics-column">
+                    <div class="score-box">
+                        <div class="score-number">{{ item.avg_rating }}</div>
+                        <div class="score-stars">
+                            {% for i in range(1,6) %}
+                                {% if i <= item.avg_rating|int %}
+                                <span class="star-gold">★</span>
+                                {% else %}
+                                <span class="star-gray">★</span>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="score-count">{{ item.total_ratings }} total rating{% if item.total_ratings != 1 %}s{% endif %}</div>
+                    </div>
+
+                    <!-- 1-5 Star Distribution Bars -->
+                    <div class="distribution-bars">
+                        <h4 class="dist-title">Rating Distribution</h4>
+                        {% for star in [5, 4, 3, 2, 1] %}
+                        {% set count = item.distribution[star] %}
+                        {% set pct = item.dist_pct[star] %}
+                        <div class="dist-row">
+                            <span class="star-label">{{ star }} ★</span>
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: {{ pct }}%;"></div>
+                            </div>
+                            <span class="dist-count">{{ count }} <small>({{ pct }}%)</small></span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Right: Customer Reviews & Comments -->
+                <div class="reviews-column">
+                    <h3 class="reviews-title">
+                        <i class="fa fa-comments" style="color: #6366f1;"></i> Customer Reviews ({{ item.comments|length }})
+                    </h3>
+
+                    {% if item.comments %}
+                    <div class="comments-scroll-list">
+                        {% for c in item.comments %}
+                        <div class="comment-item">
+                            <div class="comment-user">
+                                <i class="fa fa-user-circle user-avatar-icon"></i>
+                                <span class="user-name">{{ c.FirstName }} {{ c.LastName }}</span>
+                                <span class="comment-date">{{ c.Date_written[:10] if c.Date_written else '' }}</span>
+                            </div>
+                            <div class="comment-body">
+                                {{ c.comment_TEXT }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="no-reviews-box">
+                        <i class="fa fa-comment-slash"></i>
+                        <p>No customer reviews left for this product yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa fa-star-half-alt empty-icon"></i>
+        <h3>No products registered</h3>
+        <p>You haven't published any products yet. Products you add in your dashboard will appear here with analytics.</p>
+        <a href="/producer/dashboard" class="btn-primary">Go to Producer Studio</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

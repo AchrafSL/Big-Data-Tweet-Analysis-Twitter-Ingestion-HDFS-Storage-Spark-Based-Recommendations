@@ -1,0 +1,556 @@
+/* Admin_CSV.css — Clean, modern styling matching the DamsoStream aesthetic */
+
+.admin-csv-wrapper {
+    width: 92%;
+    max-width: 1200px;
+    margin: 24px auto 60px;
+    font-family: 'Montserrat', sans-serif;
+    color: #1e293b;
+}
+
+/* Header */
+.admin-csv-header {
+    background: #ffffff;
+    padding: 24px 32px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.admin-csv-header h1 {
+    font-size: 1.75rem;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.admin-csv-header .subtitle {
+    margin: 0 0 12px 0;
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.csv-meta-note {
+    background: #f8fafc;
+    border-left: 3px solid #6366f1;
+    padding: 8px 14px;
+    border-radius: 0 6px 6px 0;
+    color: #475569;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.output-path {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+.output-path code {
+    color: #0f172a;
+    font-weight: 600;
+    word-break: break-all;
+}
+
+/* 3 Cards Grid */
+.csv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.csv-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.csv-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+}
+
+.csv-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+}
+
+.csv-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.csv-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+.csv-schema {
+    margin: 0;
+}
+
+.csv-schema code {
+    background: #f1f5f9;
+    color: #4338ca;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.csv-desc {
+    font-size: 0.88rem;
+    color: #64748b;
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+    flex-grow: 1;
+}
+
+.csv-actions {
+    margin-top: auto;
+}
+
+.btn-gen {
+    width: 100%;
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s, transform 0.15s;
+    font-family: inherit;
+}
+
+.btn-gen:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+/* Result Box */
+.csv-result-box {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.csv-result-box.ok {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+}
+
+.csv-result-box.error {
+    border-color: #fecaca;
+    background: #fef2f2;
+}
+
+.result-status.ok {
+    color: #15803d;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.result-status.err {
+    color: #b91c1c;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    width: fit-content;
+}
+
+.btn-download:hover {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+}
+
+.result-time {
+    color: #94a3b8;
+    font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .admin-csv-wrapper {
+        width: 95%;
+        margin: 16px auto 40px;
+    }
+
+    .admin-csv-header {
+        padding: 18px 20px;
+    }
+
+    .csv-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .json-section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .json-tab-controls {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .json-panels-container.grid-view {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* JSON Test Data Import Section */
+.json-import-section {
+    margin-top: 36px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 28px 32px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.json-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.json-section-title h2 {
+    font-size: 1.4rem;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.json-section-title .subtitle {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Tab Controls */
+.json-tab-controls {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: #f1f5f9;
+    padding: 4px;
+    border-radius: 10px;
+}
+
+.json-tab-btn {
+    border: none;
+    background: transparent;
+    color: #64748b;
+    padding: 8px 16px;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.json-tab-btn:hover {
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.6);
+}
+
+.json-tab-btn.active {
+    background: #ffffff;
+    color: #4338ca;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+/* Panels */
+.json-panels-container {
+    width: 100%;
+}
+
+.json-panels-container.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.json-card-panel {
+    display: none;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.json-card-panel.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.json-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.json-card-header h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+}
+
+/* Example Box */
+.json-example-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+}
+
+.json-example-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.btn-load-example {
+    background: #e0e7ff;
+    color: #4338ca;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.76rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+}
+
+.btn-load-example:hover {
+    background: #c7d2fe;
+    color: #312e81;
+}
+
+.json-example-code {
+    margin: 0;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.78rem;
+    color: #334155;
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: pre;
+    line-height: 1.4;
+}
+
+/* Input Area */
+.json-input-wrapper {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.json-input-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.json-textarea {
+    width: 100%;
+    min-height: 160px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #0f172a;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 12px;
+    line-height: 1.45;
+    resize: vertical;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.json-textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* Actions */
+.json-card-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.btn-import {
+    background: #0f172a;
+    color: #ffffff;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-import:hover:not(:disabled) {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.btn-import:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-clear {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-clear:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+/* Status Messages */
+.json-status-box {
+    margin-top: 6px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+}
+
+.json-status-box.ok {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #15803d;
+}
+
+.json-status-box.err {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.json-status-box .result-status {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.json-status-box .result-status i {
+    font-size: 1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+}

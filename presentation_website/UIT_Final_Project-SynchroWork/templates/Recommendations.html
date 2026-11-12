@@ -1,0 +1,210 @@
+{% extends "Menu.html" %}
+{% block body %}
+<div class="recs-container">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/Recommendations.css') }}">
+
+    <!-- Header Section -->
+    <div class="recs-header">
+        <div class="header-content">
+            <h1>
+                <i class="fa fa-magic" style="color: #ec4899;"></i>
+                Personalized Recommendations
+            </h1>
+            <p class="header-subtitle">
+                Ranked products matching your user profile
+            </p>
+        </div>
+        {% if has_preferences %}
+        <div class="header-actions">
+            <a href="/recommendations?refresh=true" class="prompt-btn refresh-recs-btn" id="refreshRecsBtn" title="Retrain recommendation model with latest data">
+                <i class="fa fa-sync-alt"></i> Refresh Model
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recommendations Grid / Listing -->
+    <section class="recs-section">
+
+        {% if not has_preferences %}
+        <!-- Preferences Required Message -->
+        <div class="preferences-prompt-card" style="margin-top: 10px;">
+            <div class="prompt-icon">
+                <i class="fa fa-sliders-h"></i>
+            </div>
+            <div class="prompt-text">
+                <h3>Preferences Required</h3>
+                <p>To access your personalized recommendations, please select both your <strong>favorite theme</strong> and <strong>favorite color</strong> in your profile.</p>
+            </div>
+            <a href="/USER_Page" class="prompt-btn"><i class="fa fa-user-cog"></i> Complete Preferences</a>
+        </div>
+        {% elif error_message %}
+        <!-- Recommendation API Error / Service Unavailable -->
+        <div class="preferences-prompt-card" style="margin-top: 10px; background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border: 1px solid #fecdd3;">
+            <div class="prompt-icon" style="background: #e11d48; color: #ffffff;">
+                <i class="fa fa-exclamation-triangle"></i>
+            </div>
+            <div class="prompt-text">
+                <h3 style="color: #9f1239;">Recommendation Service Unavailable</h3>
+                <p style="color: #881337;">{{ error_message }}</p>
+            </div>
+            <a href="/recommendations?refresh=true" class="prompt-btn" style="background: #e11d48;"><i class="fa fa-sync-alt"></i> Try Again</a>
+        </div>
+        {% elif recommendations %}
+        <div class="product-cards-grid">
+            {% for p in recommendations %}
+            <div class="rec-card">
+                <div class="rec-badge-wrap">
+                    <span class="rec-badge for-you-badge">
+                        <i class="fa fa-award"></i> Rank #{{ p.rank }} &bull; Score: {{ p.finalScore }}
+                    </span>
+                </div>
+                <div class="card-img-wrap">
+                    <a href="/Product_Description?productId={{ p.idOffer }}">
+                        <img src="{{ url_for('static', filename='Images/product_pics/' + p.image_Name) }}"
+                            alt="{{ p.name }}" onerror="this.src='/static/Images/logo.jpg'">
+                    </a>
+                    {% if p.theme %}
+                    <span class="category-tag">{{ p.theme }}</span>
+                    {% endif %}
+                </div>
+                <div class="card-content">
+                    <h3 class="product-name">
+                        <a href="/Product_Description?productId={{ p.idOffer }}">{{ p.name }}</a>
+                    </h3>
+
+                    <!-- Score Breakdown Pills -->
+                    {% if p.alsScore or p.trendScore %}
+                    <div class="scores-bar">
+                        {% if p.alsScore %}<span>ALS: {{ p.alsScore }}</span>{% endif %}
+                        {% if p.trendScore %}<span>Trend: {{ p.trendScore }}</span>{% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="rating-price-row">
+                        <div class="rating-box">
+                            <span class="stars-gold">★</span>
+                            <span class="rating-num">{{ p.avg_rating }}</span>
+                            <span class="rating-sub">({{ p.rating_count }})</span>
+                        </div>
+                        <div class="price-box">
+                            <span class="price-val">{{ p.Offer_price }} MAD</span>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <a href="/Product_Description?productId={{ p.idOffer }}" class="btn-details">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Simple Fallback Message -->
+        <div class="preferences-prompt-card" style="margin-top: 20px;">
+            <div class="prompt-icon">
+                <i class="fa fa-info-circle"></i>
+            </div>
+            <div class="prompt-text">
+                <h3>No Recommendations Available Yet</h3>
+                <p>No personalized recommendations were found for your account in the recommendation dataset. You can generate recommendations now by retraining the model.</p>
+            </div>
+            <a href="/recommendations?refresh=true" class="prompt-btn"><i class="fa fa-magic"></i> Generate Recommendations</a>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Loading Indicator Overlay for Refresh / Generation -->
+    <div id="recsLoadingOverlay" class="recs-loading-overlay" style="display: none;">
+        <div class="recs-loading-card">
+            <div class="recs-spinner"></div>
+            <h3 style="color: #0f172a; margin: 0 0 10px 0; font-size: 1.25rem; font-weight: 700;">Generating Recommendations...</h3>
+            <p style="color: #475569; font-size: 0.92rem; margin: 0 0 16px 0; line-height: 1.5;">
+                Generating embeddings, building Maven packages, and running Spark ALS collaborative filtering on Linux Master.
+            </p>
+            <div style="background: #fdf2f8; border: 1px solid #fbcfe8; border-radius: 8px; padding: 12px 14px; color: #9d174d; font-size: 0.85rem; line-height: 1.4;">
+                <i class="fa fa-clock" style="margin-right: 6px;"></i> This process may take 30–90 seconds. Please keep this page open.
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .recs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .refresh-recs-btn {
+            background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.25);
+            cursor: pointer;
+        }
+        .refresh-recs-btn:hover {
+            background: linear-gradient(135deg, #db2777 0%, #9d174d 100%);
+            transform: translateY(-1px);
+        }
+        .recs-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(4px);
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .recs-loading-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 36px 32px;
+            max-width: 460px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            animation: recsFadeIn 0.3s ease;
+        }
+        .recs-spinner {
+            width: 52px;
+            height: 52px;
+            border: 5px solid #fbcfe8;
+            border-top: 5px solid #ec4899;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            animation: recsSpin 0.9s linear infinite;
+        }
+        @keyframes recsSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes recsFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var overlay = document.getElementById("recsLoadingOverlay");
+            if (!overlay) return;
+
+            function triggerLoading() {
+                overlay.style.display = "flex";
+            }
+
+            var refreshBtn = document.getElementById("refreshRecsBtn");
+            if (refreshBtn) {
+                refreshBtn.addEventListener("click", triggerLoading);
+            }
+
+            var refreshLinks = document.querySelectorAll("a[href*='refresh=true']");
+            refreshLinks.forEach(function(link) {
+                link.addEventListener("click", triggerLoading);
+            });
+        });
+    </script>
+</div>
+{% endblock %}

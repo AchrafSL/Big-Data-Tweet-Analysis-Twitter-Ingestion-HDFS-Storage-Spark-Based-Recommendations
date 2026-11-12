@@ -1,0 +1,251 @@
+{% extends "Menu.html" %}
+{% block body %}
+<div class="trends-container">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='CSS/Trends.css') }}">
+
+    <!-- Header Section -->
+    <div class="trends-header">
+        <div class="header-content">
+            <h1><i class="fa fa-chart-line" style="color: #3b82f6;"></i> Real-Time Trends &amp; Market Intelligence</h1>
+            <p class="subtitle">Monitor top market streaming keywords and real-time interest volumes across global, daily, and hourly timeframes.</p>
+        </div>
+        <div class="header-tag">
+            <span class="pipeline-badge"><i class="fa fa-network-wired"></i> Connected to Live Pipeline</span>
+        </div>
+    </div>
+
+    <!-- Admin Refresh Controls Section (Visible only to authenticated admins) -->
+    {% if session.get('role') == 'admin' %}
+    <div class="admin-refresh-panel">
+        <div class="admin-refresh-title">
+            <i class="fa fa-shield-alt" style="color: #3b82f6;"></i>
+            <span>Admin Trend Recalculation Controls</span>
+            <span class="api-target-badge">Target API: <code>{{ linux_api_url|default("http://<LINUX_VM_HOST>:5001") }}</code></span>
+        </div>
+
+        <div class="admin-actions-container">
+            <!-- 1. Refresh Global Trends: button only, no input -->
+            <form id="globalTrendsForm" action="/trends/refresh/global" method="POST" class="trend-action-card">
+                <input type="hidden" name="trend_type" value="global">
+                <div class="action-info">
+                    <span class="action-name"><i class="fa fa-globe"></i> Global Trends</span>
+                    <span class="action-desc">Recalculate all-time trends</span>
+                </div>
+                <button type="submit" class="btn-primary refresh-btn" id="refreshGlobalBtn">
+                    <i class="fa fa-sync-alt"></i> Refresh Global Trends
+                </button>
+            </form>
+
+            <!-- 2. Refresh Daily Trends: plain text input for date (YYYY-MM-DD) + refresh button -->
+            <form id="dailyTrendsForm" action="/trends/refresh/daily" method="POST" class="trend-action-card">
+                <input type="hidden" name="trend_type" value="daily">
+                <div class="action-info">
+                    <span class="action-name"><i class="fa fa-calendar-day"></i> Daily Trends</span>
+                    <span class="action-desc">Filter by specific date</span>
+                </div>
+                <div class="inputs-group">
+                    <input type="text" name="date" id="dailyDateInput" class="date-text-input" placeholder="YYYY-MM-DD" autocomplete="off" required>
+                    <button type="submit" class="btn-primary refresh-btn" id="refreshDailyBtn">
+                        <i class="fa fa-sync-alt"></i> Refresh Daily Trends
+                    </button>
+                </div>
+            </form>
+
+            <!-- 3. Refresh Hourly Trends: two plain text inputs (YYYY-MM-DD and 0–23) + refresh button -->
+            <form id="hourlyTrendsForm" action="/trends/refresh/hourly" method="POST" class="trend-action-card">
+                <input type="hidden" name="trend_type" value="hourly">
+                <div class="action-info">
+                    <span class="action-name"><i class="fa fa-clock"></i> Hourly Trends</span>
+                    <span class="action-desc">Filter by date and hour</span>
+                </div>
+                <div class="inputs-group">
+                    <input type="text" name="date" id="hourlyDateInput" class="date-text-input" placeholder="YYYY-MM-DD" autocomplete="off" required>
+                    <input type="text" name="hour" id="hourlyHourInput" class="date-text-input hour-text-input" placeholder="0–23" autocomplete="off" required>
+                    <button type="submit" class="btn-primary refresh-btn" id="refreshHourlyBtn">
+                        <i class="fa fa-sync-alt"></i> Refresh Hourly Trends
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Live Status / Loading Message & Success/Error Feedback -->
+        <div id="trendFeedback" class="trend-status-banner" style="display: none;"></div>
+    </div>
+    {% endif %}
+
+    <!-- Flashed messages for server-side redirects -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="trends-flash-messages">
+          {% for category, message in messages %}
+            <div class="trend-status-banner {{ 'error' if category in ('error', 'danger') else 'success' }}">
+              <i class="fa {{ 'fa-exclamation-triangle' if category in ('error', 'danger') else 'fa-check-circle' }}"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Controls Bar: Tabs & Last Update Metadata -->
+    <div class="trends-controls-bar">
+        <div class="tab-buttons">
+            <a href="/trends?tab=global" class="tab-btn {% if tab == 'global' %}active{% endif %}" id="globalTabBtn">
+                <i class="fa fa-globe"></i> Global Trends
+            </a>
+            <a href="/trends?tab=daily" class="tab-btn {% if tab == 'daily' %}active{% endif %}" id="dailyTabBtn">
+                <i class="fa fa-calendar-day"></i> Daily Trends
+            </a>
+            <a href="/trends?tab=hourly" class="tab-btn {% if tab == 'hourly' %}active{% endif %}" id="hourlyTabBtn">
+                <i class="fa fa-clock"></i> Hourly Trends
+            </a>
+        </div>
+
+        <div class="filter-meta-group">
+            {% if hourly_meta and hourly_meta.date %}
+            <div class="update-meta">
+                <i class="fa fa-filter"></i> Date: <strong>{{ hourly_meta.date }}</strong> | Hour: <strong>{{ hourly_meta.hour }}:00</strong>
+            </div>
+            {% endif %}
+            {% if last_updated %}
+            <div class="update-meta">
+                <i class="fa fa-clock"></i> Last updated: <strong>{{ last_updated }}</strong>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Trends Table Section -->
+    <div class="trends-list-section">
+        <div class="section-top-info">
+            <h2>
+                {% if tab == 'global' %}
+                Global Trending Topics
+                {% elif tab == 'daily' %}
+                Daily Trending Topics
+                {% else %}
+                Hourly Trending Topics
+                {% endif %}
+            </h2>
+            <span class="count-pill">{{ total_count }} topic{% if total_count != 1 %}s{% endif %} recorded</span>
+        </div>
+
+        {% if trends %}
+        <div class="trends-table-wrapper">
+            <table class="trends-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Rank</th>
+                        <th>Topic</th>
+                        <th style="width: 180px;">Frequency</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in trends %}
+                    <tr class="trend-row">
+                        <td class="rank-cell">
+                            <span class="rank-badge rank-{{ t.rank or loop.index }}">#{{ t.rank or loop.index }}</span>
+                        </td>
+                        <td class="topic-cell">
+                            <strong class="topic-name">{{ t.topic }}</strong>
+                        </td>
+                        <td class="freq-cell">
+                            <span class="freq-value">{{ t.frequency }}</span>
+                            <span class="freq-unit">mentions</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa fa-chart-line empty-icon"></i>
+            <h3>No trend data available</h3>
+            <p>The {{ tab }} trends dataset is currently empty.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if session.get('role') == 'admin' %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const feedbackBox = document.getElementById('trendFeedback');
+
+    function showFeedback(type, message, isLoading = false) {
+        if (!feedbackBox) return;
+        feedbackBox.style.display = 'flex';
+        feedbackBox.className = 'trend-status-banner ' + type;
+        const icon = isLoading
+            ? '<i class="fa fa-spinner fa-spin"></i>'
+            : (type === 'success' ? '<i class="fa fa-check-circle"></i>' : '<i class="fa fa-exclamation-triangle"></i>');
+        feedbackBox.innerHTML = `${icon} <span>${message}</span>`;
+    }
+
+    function disableForms(disabled) {
+        document.querySelectorAll('.admin-refresh-panel button, .admin-refresh-panel input').forEach(el => {
+            el.disabled = disabled;
+        });
+    }
+
+    function setupForm(form, trendType) {
+        if (!form) return;
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const dateVal = (formData.get('date') || '').trim();
+            const hourVal = (formData.get('hour') || '').trim();
+
+            if (trendType === 'daily' || trendType === 'hourly') {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) {
+                    showFeedback('error', 'Please enter a valid date in YYYY-MM-DD format (e.g., 2023-01-15).');
+                    return;
+                }
+            }
+            if (trendType === 'hourly') {
+                const hourNum = parseInt(hourVal, 10);
+                if (isNaN(hourNum) || hourNum < 0 || hourNum > 23 || !/^\d{1,2}$/.test(hourVal)) {
+                    showFeedback('error', 'Please enter a valid hour between 0 and 23.');
+                    return;
+                }
+            }
+
+            // Show loading message while request is processing
+            showFeedback('loading', `Connecting to Linux Master to recalculate ${trendType} trends... Please wait.`, true);
+            disableForms(true);
+
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(res => res.json().then(data => ({ status: res.status, ok: res.ok, data })).catch(() => ({ status: res.status, ok: false, data: { error: 'Non-JSON response received from server.' } })))
+            .then(({ status, ok, data }) => {
+                disableForms(false);
+                if (!ok || !data.success) {
+                    showFeedback('error', data.error || `Recalculation failed with status ${status}.`);
+                    return;
+                }
+                showFeedback('success', data.message || `${trendType.toUpperCase()} trends refreshed successfully.`);
+                setTimeout(function () {
+                    window.location.href = `/trends?tab=${trendType}`;
+                }, 1000);
+            })
+            .catch(err => {
+                disableForms(false);
+                showFeedback('error', 'Network error communicating with Flask backend: ' + err.message);
+            });
+        });
+    }
+
+    setupForm(document.getElementById('globalTrendsForm'), 'global');
+    setupForm(document.getElementById('dailyTrendsForm'), 'daily');
+    setupForm(document.getElementById('hourlyTrendsForm'), 'hourly');
+});
+</script>
+{% endif %}
+{% endblock %}
